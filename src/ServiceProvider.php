@@ -4,7 +4,7 @@ namespace Bellal\Services\Pubnub;
 use Bellal\Services\Pubnub\Broadcasting\Broadcaster;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use PubNub\PNConfiguration;
-use Pubnub\Pubnub;
+use PubNub\PubNub;
 
 /**
  * Class ServiceProvider
@@ -21,10 +21,8 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function boot()
     {
-        // Register publish groups
         $this->publishGroups();
 
-        // Add PubNub to broadcast manager
         app('Illuminate\Broadcasting\BroadcastManager')->extend('pubnub', function($app) {
             return new Broadcaster($app['bellal.services.pubnub']);
         });
@@ -49,7 +47,6 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function publishGroups()
     {
-        // Config files
         $this->publishes([
             __DIR__ . '/../config/pubnub.php' => config_path('bellal/services/pubnub.php'),
         ], 'config');

@@ -2,8 +2,10 @@
 namespace Bellal\Services\Pubnub\Broadcasting;
 
 use Illuminate\Contracts\Broadcasting\Broadcaster as IlluminateContractBroadcaster;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Pubnub\Pubnub;
-
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 /**
  * Class Broadcaster
  *
@@ -27,6 +29,34 @@ class Broadcaster implements IlluminateContractBroadcaster
     public function __construct(Pubnub $pubnub)
     {
         $this->pubnub = $pubnub;
+    }
+
+    public function auth($request)
+    {
+        if (Str::startsWith($request->channel_name, ['private-', 'presence-']) &&
+            ! $request->user()) {
+            throw new AccessDeniedHttpException;
+        }
+
+        $channelName = Str::startsWith($request->channel_name, 'private-')
+                            ? Str::replaceFirst('private-', '', $request->channel_name)
+                            : Str::replaceFirst('presence-', '', $request->channel_name);
+
+        return parent::verifyUserCanAccessChannel(
+            $request, $channelName
+        );
+    }
+
+    /**
+     * Return the valid authentication response.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $result
+     * @return mixed
+     */
+    public function validAuthenticationResponse($request, $result)
+    {
+        return;
     }
 
     /**
